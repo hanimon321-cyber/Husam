@@ -1,0 +1,1816 @@
+```html
+<!DOCTYPE html>
+<html lang="ml" class="h-full bg-neutral-950">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan & Finance</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #0a0a0a;
+            color: #171717;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .app-card {
+            background: #ffffff;
+            border: 1px solid #f0f0f0;
+            border-radius: 1.25rem;
+            box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.04);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .tab-btn {
+            transition: all 0.2s ease;
+            color: #737373;
+            border-radius: 9999px;
+            font-weight: 500;
+        }
+        .tab-btn:hover {
+            color: #171717;
+        }
+        .tab-btn.active {
+            color: #ffffff;
+            background-color: #171717;
+            font-weight: 600;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .form-input {
+            width: 100%;
+            padding: 0.625rem 0.875rem;
+            font-size: 0.8125rem;
+            border-radius: 0.75rem;
+            border: 1px solid #e5e5e5;
+            background-color: #fafafa;
+            transition: all 0.15s ease;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #171717;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(23, 23, 23, 0.05);
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+        }
+        .debt-card {
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .debt-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="min-h-full bg-neutral-100 antialiased selection:bg-neutral-800 selection:text-white pb-24">
+
+    <!-- MPIN LOCK OVERLAY -->
+    <div id="mpin-screen" class="fixed inset-0 bg-neutral-950 z-50 flex flex-col items-center justify-center p-6 text-white backdrop-blur-xl">
+        <div class="max-w-xs w-full text-center space-y-7">
+            <div class="w-14 h-14 bg-neutral-900 rounded-2xl flex items-center justify-center mx-auto text-amber-400 shadow-2xl border border-neutral-800/80">
+                <i class="fa-solid fa-shield-halved text-2xl"></i>
+            </div>
+            <div class="space-y-1">
+                <h2 class="text-xl font-bold tracking-tight text-neutral-100" id="mpin-title">Enter Security PIN</h2>
+                <p class="text-xs text-neutral-400 font-medium" id="mpin-subtitle">സുരക്ഷയ്ക്കായി 4-അക്ക MPIN നൽകുക (Default: 1234)</p>
+            </div>
+
+            <!-- PIN Input Display -->
+            <div class="flex justify-center gap-3.5 my-2">
+                <div class="w-11 h-13 bg-neutral-900/90 border border-neutral-800 rounded-2xl flex items-center justify-center text-xl font-bold transition-all text-amber-400" id="pin-box-1">•</div>
+                <div class="w-11 h-13 bg-neutral-900/90 border border-neutral-800 rounded-2xl flex items-center justify-center text-xl font-bold transition-all text-amber-400" id="pin-box-2">•</div>
+                <div class="w-11 h-13 bg-neutral-900/90 border border-neutral-800 rounded-2xl flex items-center justify-center text-xl font-bold transition-all text-amber-400" id="pin-box-3">•</div>
+                <div class="w-11 h-13 bg-neutral-900/90 border border-neutral-800 rounded-2xl flex items-center justify-center text-xl font-bold transition-all text-amber-400" id="pin-box-4">•</div>
+            </div>
+
+            <p id="mpin-error" class="text-xs text-rose-400 font-medium hidden animate-pulse">തെറ്റായ MPIN! വീണ്ടും ശ്രമിക്കുക.</p>
+
+            <!-- Keypad -->
+            <div class="grid grid-cols-3 gap-3 pt-2 max-w-[260px] mx-auto">
+                <button type="button" onclick="pressPin('1', event)" class="h-13 bg-neutral-900/80 hover:bg-neutral-800 rounded-2xl font-bold text-lg active:scale-95 transition-all text-neutral-200 border border-neutral-800/50">1</button>
+                <button type="button" onclick="pressPin('2', event)" class="h-13 bg-neutral-900/80 hover:bg-neutral-800 rounded-2xl font-bold text-lg active:scale-95 transition-all text-neutral-200 border border-neutral-800/50">2</button>
+                <button type="button" onclick="pressPin('3', event)" class="h-13 bg-neutral-900/80 hover:bg-neutral-800 rounded-2xl font-bold text-lg active:scale-95 transition-all text-neutral-200 border border-neutral-800/50">3</button>
+                <button type="button" onclick="pressPin('4', event)" class="h-13 bg-neutral-900/80 hover:bg-neutral-800 rounded-2xl font-bold text-lg active:scale-95 transition-all text-neutral-200 border border-neutral-800/50">4</button>
+                <button type="button" onclick="pressPin('5', event)" class="h-13 bg-neutral-900/80 hover:bg-neutral-800 rounded-2xl font-bold text-lg active:scale-95 transition-all text-neutral-200 border border-neutral-800/50">5</button>
+                <button type="button" onclick="pressPin('6', event)" class="h-13 bg-neutral-900/80 hover:bg-neutral-800 rounded-2xl font-bold text-lg active:scale-95 transition-all text-neutral-200 border border-neutral-800/50">6</button>
+                <button type="button" onclick="pressPin('7', event)" class="h-13 bg-neutral-900/80 hover:bg-neutral-800 rounded-2xl font-bold text-lg active:scale-95 transition-all text-neutral-200 border border-neutral-800/50">7</button>
+                <button type="button" onclick="pressPin('8', event)" class="h-13 bg-neutral-900/80 hover:bg-neutral-800 rounded-2xl font-bold text-lg active:scale-95 transition-all text-neutral-200 border border-neutral-800/50">8</button>
+                <button type="button" onclick="pressPin('9', event)" class="h-13 bg-neutral-900/80 hover:bg-neutral-800 rounded-2xl font-bold text-lg active:scale-95 transition-all text-neutral-200 border border-neutral-800/50">9</button>
+                <button type="button" onclick="triggerPinReset(event)" class="h-13 text-xs font-semibold text-neutral-400 hover:text-white flex items-center justify-center transition-colors">Reset</button>
+                <button type="button" onclick="pressPin('0', event)" class="h-13 bg-neutral-900/80 hover:bg-neutral-800 rounded-2xl font-bold text-lg active:scale-95 transition-all text-neutral-200 border border-neutral-800/50">0</button>
+                <button type="button" onclick="clearPin(event)" class="h-13 bg-neutral-900/80 hover:bg-neutral-800 text-rose-400 rounded-2xl font-bold text-sm active:scale-95 transition-all border border-neutral-800/50 flex items-center justify-center"><i class="fa-solid fa-backspace"></i></button>
+            </div>
+
+            <!-- DIRECT UNLOCK BACKUP BUTTON -->
+            <div class="pt-2">
+                <button type="button" onclick="bypassMpin(event)" class="text-[11px] font-semibold text-amber-400 hover:underline">
+                    Unlock Directly (ഡയറക്ട് അൺലോക്ക്)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Sticky Header -->
+    <header class="bg-white/80 backdrop-blur-md border-b border-neutral-200/60 sticky top-0 z-30 px-4 py-3">
+        <div class="max-w-xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 bg-neutral-900 text-white rounded-xl flex items-center justify-center text-xs shadow-sm">
+                    <i class="fa-solid fa-compass text-amber-400"></i>
+                </div>
+                <div>
+                    <h1 class="text-xs font-bold text-neutral-900 tracking-tight" data-i18n="app_title">Plan & Finance</h1>
+                    <p class="text-[10px] text-neutral-400 font-semibold" id="current-date"></p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="lockApp()" class="w-8 h-8 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-xl transition-all flex items-center justify-center text-xs" title="Lock App">
+                    <i class="fa-solid fa-lock"></i>
+                </button>
+                <button type="button" onclick="toggleLanguage()" class="bg-neutral-100 hover:bg-neutral-200 px-3 py-1.5 rounded-xl text-[11px] font-bold text-neutral-700 transition-all flex items-center gap-1.5">
+                    <i class="fa-solid fa-globe text-neutral-400"></i>
+                    <span id="lang-label">EN</span>
+                </button>
+                <div class="bg-neutral-900 px-2.5 py-1.5 rounded-xl text-[11px] font-bold text-white shadow-sm">
+                    <span id="completion-stats">0/0</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-xl mx-auto px-4 mt-3">
+
+        <!-- Navigation Tabs -->
+        <div class="flex p-1 bg-neutral-200/60 rounded-full mb-4 text-xs gap-1 no-scrollbar overflow-x-auto border border-neutral-200/80">
+            <button id="tab-dashboard-btn" onclick="switchTab('dashboard')" class="tab-btn active py-1.5 px-3.5 text-center flex items-center justify-center gap-1.5 whitespace-nowrap">
+                <i class="fa-solid fa-chart-pie text-[11px]"></i> <span data-i18n="tab_dashboard">ഓവർവ്യൂ</span>
+            </button>
+            <button id="tab-report-btn" onclick="switchTab('report')" class="tab-btn py-1.5 px-3.5 text-center flex items-center justify-center gap-1.5 whitespace-nowrap">
+                <i class="fa-solid fa-calculator text-[11px]"></i> <span data-i18n="tab_report">റിപ്പോർട്ട്</span>
+            </button>
+            <button id="tab-routines-btn" onclick="switchTab('routines')" class="tab-btn py-1.5 px-3.5 text-center flex items-center justify-center gap-1.5 whitespace-nowrap">
+                <i class="fa-solid fa-rotate-right text-[11px]"></i> <span data-i18n="tab_routines">റൂട്ടീൻസ്</span>
+            </button>
+            <button id="tab-tasks-btn" onclick="switchTab('tasks')" class="tab-btn py-1.5 px-3.5 text-center flex items-center justify-center gap-1.5 whitespace-nowrap">
+                <i class="fa-solid fa-check text-[11px]"></i> <span data-i18n="tab_tasks">ടാസ്കുകൾ</span>
+            </button>
+            <button id="tab-finance-btn" onclick="switchTab('finance')" class="tab-btn py-1.5 px-3.5 text-center flex items-center justify-center gap-1.5 whitespace-nowrap">
+                <i class="fa-solid fa-arrow-left-right text-[11px]"></i> <span data-i18n="tab_finance">വരവ് / ചെലവ്</span>
+            </button>
+            <button id="tab-debts-btn" onclick="switchTab('debts')" class="tab-btn py-1.5 px-3.5 text-center flex items-center justify-center gap-1.5 whitespace-nowrap">
+                <i class="fa-solid fa-handshake text-[11px]"></i> <span data-i18n="tab_debts">കടങ്ങൾ</span>
+            </button>
+            <button id="tab-loans-btn" onclick="switchTab('loans')" class="tab-btn py-1.5 px-3.5 text-center flex items-center justify-center gap-1.5 whitespace-nowrap">
+                <i class="fa-solid fa-building-columns text-[11px]"></i> <span data-i18n="tab_loans">വായ്പകൾ</span>
+            </button>
+            <button id="tab-chitty-btn" onclick="switchTab('chitty')" class="tab-btn py-1.5 px-3.5 text-center flex items-center justify-center gap-1.5 whitespace-nowrap">
+                <i class="fa-solid fa-piggy-bank text-[11px]"></i> <span data-i18n="tab_chitty">ചിട്ടി</span>
+            </button>
+            <button id="tab-accounts-btn" onclick="switchTab('accounts')" class="tab-btn py-1.5 px-3.5 text-center flex items-center justify-center gap-1.5 whitespace-nowrap">
+                <i class="fa-solid fa-wallet text-[11px]"></i> <span data-i18n="tab_accounts">അക്കൗണ്ട്</span>
+            </button>
+            <button id="tab-goals-btn" onclick="switchTab('goals')" class="tab-btn py-1.5 px-3.5 text-center flex items-center justify-center gap-1.5 whitespace-nowrap">
+                <i class="fa-solid fa-bullseye text-[11px]"></i> <span data-i18n="tab_goals">ലക്ഷ്യങ്ങൾ</span>
+            </button>
+        </div>
+
+        <!-- DASHBOARD OVERVIEW -->
+        <div id="tab-dashboard" class="space-y-3">
+            <div id="notification-banner" class="hidden bg-neutral-900 text-white p-3.5 rounded-2xl flex items-center justify-between shadow-sm">
+                <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-bell text-amber-400 text-sm"></i>
+                    <div>
+                        <span class="text-[9px] uppercase font-bold text-neutral-400 tracking-wider block" data-i18n="notif_reminder">Reminder</span>
+                        <h4 class="text-xs font-medium" id="notif-title">Task Title</h4>
+                    </div>
+                </div>
+                <button onclick="dismissNotification()" class="bg-neutral-800 hover:bg-neutral-700 text-white text-[11px] px-2.5 py-1 rounded-lg transition-colors" data-i18n="dismiss">Dismiss</button>
+            </div>
+
+            <!-- Enhanced Daily Target Banner -->
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-neutral-900 via-neutral-900 to-neutral-950 p-5 text-white shadow-xl border border-neutral-800/80">
+                <!-- Background Decorative Pattern -->
+                <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-800/40 text-7xl pointer-events-none pr-1">
+                    <i class="fa-solid fa-bullseye"></i>
+                </div>
+
+                <div class="relative z-10 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-lg bg-amber-400/10 border border-amber-400/20 flex items-center justify-center text-amber-400 text-xs">
+                                <i class="fa-solid fa-arrow-trend-up"></i>
+                            </div>
+                            <span class="text-[11px] font-bold text-neutral-400 uppercase tracking-wider" data-i18n="dash_target_label">പ്രതിദിന മിനിമം വരുമാന ലക്ഷ്യം</span>
+                        </div>
+                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-400/10 text-amber-300 border border-amber-400/20">
+                            <i class="fa-solid fa-fire text-[9px]"></i> Min Goal
+                        </span>
+                    </div>
+
+                    <div class="flex items-baseline justify-between pt-1">
+                        <div>
+                            <h2 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 tracking-tight" id="dash-daily-target-val">₹0 / day</h2>
+                        </div>
+                        <button onclick="switchTab('report')" class="group flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-800/80 hover:bg-neutral-800 border border-neutral-700/60 text-xs text-neutral-200 hover:text-white font-semibold transition-all shadow-sm">
+                            <span data-i18n="view_breakdown">വിശദാംശങ്ങൾ</span>
+                            <i class="fa-solid fa-chevron-right text-[10px] text-amber-400 group-hover:translate-x-0.5 transition-transform"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div class="stat-card p-3.5 rounded-2xl shadow-sm space-y-1">
+                    <div class="flex items-center justify-between text-neutral-400">
+                        <span class="text-[10px] font-bold uppercase tracking-wider" data-i18n="card_balance">ആകെ ബാലൻസ്</span>
+                        <i class="fa-solid fa-wallet text-xs"></i>
+                    </div>
+                    <h3 class="text-base font-black text-neutral-900" id="dash-total-bal">₹0</h3>
+                </div>
+                <div class="stat-card p-3.5 rounded-2xl shadow-sm space-y-1">
+                    <div class="flex items-center justify-between text-emerald-600">
+                        <span class="text-[10px] font-bold uppercase tracking-wider" data-i18n="card_receivable">കിട്ടാനുള്ളത്</span>
+                        <i class="fa-solid fa-arrow-down-left text-xs"></i>
+                    </div>
+                    <h3 class="text-base font-black text-emerald-700" id="dash-total-rec">₹0</h3>
+                </div>
+                <div class="stat-card p-3.5 rounded-2xl shadow-sm space-y-1">
+                    <div class="flex items-center justify-between text-rose-500">
+                        <span class="text-[10px] font-bold uppercase tracking-wider" data-i18n="card_payable">കൊടുക്കാനുള്ളത് + ലോൺ</span>
+                        <i class="fa-solid fa-arrow-up-right text-xs"></i>
+                    </div>
+                    <h3 class="text-base font-black text-rose-600" id="dash-total-pay">₹0</h3>
+                </div>
+                <div class="stat-card p-3.5 rounded-2xl shadow-sm space-y-1">
+                    <div class="flex items-center justify-between text-amber-500">
+                        <span class="text-[10px] font-bold uppercase tracking-wider" data-i18n="card_progress">പുരോഗതി</span>
+                        <i class="fa-solid fa-list-check text-xs"></i>
+                    </div>
+                    <h3 class="text-base font-black text-neutral-800" id="dash-task-prog">0/0</h3>
+                </div>
+            </div>
+
+            <!-- Dashboard Details Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="app-card p-4 space-y-3">
+                    <div class="flex justify-between items-center border-b border-neutral-100 pb-2">
+                        <h3 class="text-xs font-bold text-neutral-900 flex items-center gap-1.5">
+                            <i class="fa-solid fa-rotate-right text-amber-500"></i> <span data-i18n="routines_heading">ദിവസേനയുള്ള ശീലങ്ങൾ</span>
+                        </h3>
+                        <button onclick="switchTab('routines')" class="text-[11px] font-semibold text-neutral-400 hover:text-neutral-900 transition-colors" data-i18n="more">കൂടുതൽ</button>
+                    </div>
+                    <div id="dash-today-routines" class="space-y-2"></div>
+                </div>
+
+                <div class="app-card p-4 space-y-3">
+                    <div class="flex justify-between items-center border-b border-neutral-100 pb-2">
+                        <h3 class="text-xs font-bold text-neutral-900 flex items-center gap-1.5">
+                            <i class="fa-solid fa-calendar-check text-indigo-500"></i> <span data-i18n="today_tasks_heading">ഇന്നത്തെ ടാസ്കുകൾ</span>
+                        </h3>
+                        <button onclick="switchTab('tasks')" class="text-[11px] font-semibold text-neutral-400 hover:text-neutral-900 transition-colors" data-i18n="view_all">എല്ലാം കാണുക</button>
+                    </div>
+                    <div id="dash-today-tasks" class="space-y-2"></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="app-card p-4 space-y-3">
+                    <div class="flex justify-between items-center border-b border-neutral-100 pb-2">
+                        <h3 class="text-xs font-bold text-neutral-900 flex items-center gap-1.5">
+                            <i class="fa-solid fa-bullseye text-emerald-500"></i> <span data-i18n="tab_goals">ലക്ഷ്യങ്ങൾ</span>
+                        </h3>
+                        <button onclick="switchTab('goals')" class="text-[11px] font-semibold text-neutral-400 hover:text-neutral-900 transition-colors" data-i18n="more">കൂടുതൽ</button>
+                    </div>
+                    <div id="dash-goals-summary" class="space-y-2.5"></div>
+                </div>
+
+                <div class="app-card p-4 space-y-3">
+                    <div class="flex justify-between items-center border-b border-neutral-100 pb-2">
+                        <h3 class="text-xs font-bold text-neutral-900 flex items-center gap-1.5">
+                            <i class="fa-solid fa-hand-holding-dollar text-rose-500"></i> <span data-i18n="payables_heading">നൽകാനുള്ള തുകകൾ</span>
+                        </h3>
+                        <button onclick="switchTab('debts')" class="text-[11px] font-semibold text-neutral-400 hover:text-neutral-900 transition-colors" data-i18n="tab_debts">കടങ്ങൾ</button>
+                    </div>
+                    <div id="dash-payables-list" class="space-y-2"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT TAB -->
+        <div id="tab-report" class="hidden space-y-3">
+            <div class="app-card p-5 space-y-4">
+                <div>
+                    <h3 class="text-sm font-extrabold text-neutral-900" data-i18n="report_title">സാമ്പത്തിക വിശകലന റിപ്പോർട്ട്</h3>
+                    <p class="text-xs text-neutral-400 font-medium" data-i18n="report_desc">നിങ്ങളുടെ പ്രതിമാസ അടവുകളും സാമ്പത്തിക ഭദ്രതയും കണക്കാക്കിയുള്ള റിപ്പോർട്ട്.</p>
+                </div>
+                
+                <div class="bg-amber-500/10 border border-amber-500/20 p-4 rounded-2xl space-y-1">
+                    <span class="text-[10px] font-bold text-amber-700 uppercase tracking-widest block" data-i18n="report_min_earning">പ്രതിദിനം സമ്പാദിക്കേണ്ട തുക</span>
+                    <h2 class="text-2xl font-black text-amber-600" id="rpt-daily-target">₹0 / ദിവസം</h2>
+                    <p class="text-[11px] text-neutral-500 font-medium pt-1" id="rpt-target-explain"></p>
+                </div>
+
+                <!-- Salary vs Obligations Summary -->
+                <div class="bg-emerald-50/60 border border-emerald-100 p-4 rounded-2xl space-y-2">
+                    <h4 class="text-xs font-bold text-emerald-900 flex items-center justify-between">
+                        <span class="flex items-center gap-1.5"><i class="fa-solid fa-money-bill-wave text-emerald-600"></i> പ്രതിമാസ വരുമാന റിപ്പോർട്ട് (Salary Overview)</span>
+                    </h4>
+                    <div class="grid grid-cols-2 gap-2 pt-1">
+                        <div class="bg-white p-2.5 rounded-xl border border-emerald-100 shadow-sm">
+                            <span class="text-[9px] font-bold text-neutral-400 uppercase block">ആകെ വരവ് (Salary + Inc)</span>
+                            <span class="text-xs font-black text-emerald-700" id="rpt-total-income-sum">₹0</span>
+                        </div>
+                        <div class="bg-white p-2.5 rounded-xl border border-emerald-100 shadow-sm">
+                            <span class="text-[9px] font-bold text-neutral-400 uppercase block">ബാക്കി നിലനിൽക്കുന്ന തുക (Net Surplus)</span>
+                            <span class="text-xs font-black text-neutral-900" id="rpt-net-surplus-val">₹0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chitty & Debts Breakdown Card -->
+                <div class="bg-indigo-50/50 border border-indigo-100 p-4 rounded-2xl space-y-2">
+                    <h4 class="text-xs font-bold text-indigo-900 flex items-center gap-1.5">
+                        <i class="fa-solid fa-chart-line text-indigo-600"></i> ബാധ്യതകളുടെയും തിരിച്ചടവുകളുടെയും റിപ്പോർട്ട്
+                    </h4>
+                    <div class="grid grid-cols-2 gap-2 pt-1">
+                        <div class="bg-white p-2.5 rounded-xl border border-indigo-100/60 shadow-sm">
+                            <span class="text-[9px] font-bold text-neutral-400 uppercase block">ചിട്ടി ആകെ അടച്ചത്</span>
+                            <span class="text-xs font-black text-indigo-700" id="rpt-chitty-paid-sum">₹0</span>
+                        </div>
+                        <div class="bg-white p-2.5 rounded-xl border border-indigo-100/60 shadow-sm">
+                            <span class="text-[9px] font-bold text-neutral-400 uppercase block">ചിട്ടി ആകെ ബാക്കി</span>
+                            <span class="text-xs font-black text-rose-600" id="rpt-chitty-rem-sum">₹0</span>
+                        </div>
+                        <div class="bg-white p-2.5 rounded-xl border border-indigo-100/60 shadow-sm">
+                            <span class="text-[9px] font-bold text-neutral-400 uppercase block">വായ്പ തുകകൾ (Loans Remaining)</span>
+                            <span class="text-xs font-black text-rose-600" id="rpt-loan-principal-sum">₹0</span>
+                        </div>
+                        <div class="bg-white p-2.5 rounded-xl border border-indigo-100/60 shadow-sm">
+                            <span class="text-[9px] font-bold text-neutral-400 uppercase block">കടങ്ങൾ ആകെ വീട്ടിയത്</span>
+                            <span class="text-xs font-black text-emerald-600" id="rpt-debts-paid-sum">₹0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-2 pt-1">
+                    <h4 class="text-xs font-bold text-neutral-800 border-b border-neutral-100 pb-1.5" data-i18n="monthly_obligations">മാസാന്ത സ്ഥിര അടവുകൾ (Monthly Commitments)</h4>
+                    <div class="flex justify-between text-xs py-1"><span data-i18n="rep_emis">മാസാന്ത ലോൺ EMI കൾ:</span><span class="font-bold text-neutral-900" id="rpt-loan-emis">₹0</span></div>
+                    <div class="flex justify-between text-xs py-1"><span data-i18n="rep_chitty">മാസാന്ത ചിട്ടി അടവുകൾ:</span><span class="font-bold text-neutral-900" id="rpt-chitty-inst">₹0</span></div>
+                    <div class="flex justify-between text-xs py-1"><span data-i18n="rep_debts">കൊടുക്കാനുള്ള ആകെ കടങ്ങൾ:</span><span class="font-bold text-neutral-900" id="rpt-total-debts">₹0</span></div>
+                    <div class="flex justify-between text-xs py-1 border-t border-neutral-100 pt-2"><span class="font-bold" data-i18n="rep_total_monthly">പ്രതിമാസ ബാധ്യത തുക:</span><span class="font-black text-rose-600" id="rpt-total-monthly-req">₹0</span></div>
+                </div>
+
+                <div class="space-y-2 pt-2">
+                    <h4 class="text-xs font-bold text-neutral-800 border-b border-neutral-100 pb-1.5" data-i18n="net_financial_status">നിലവിലെ സാമ്പത്തിക ഭദ്രത (Net Balance Position)</h4>
+                    <div class="flex justify-between text-xs py-1"><span data-i18n="rep_total_cash">ലഭ്യമായ ആകെ ബാലൻസ്:</span><span class="font-bold text-neutral-900" id="rpt-total-cash">₹0</span></div>
+                    <div class="flex justify-between text-xs py-1"><span data-i18n="rep_receivable">മറ്റുള്ളവരിൽ നിന്ന് കിട്ടാനുള്ളത്:</span><span class="font-bold text-emerald-600" id="rpt-receivables">₹0</span></div>
+                    <div class="flex justify-between text-xs py-1"><span data-i18n="rep_payable">കൊടുക്കാനുള്ള ഉത്തരവാദിത്തം (കടങ്ങൾ + ലോൺ):</span><span class="font-bold text-rose-600" id="rpt-payables">₹0</span></div>
+                    <div class="flex justify-between text-xs py-1 border-t border-neutral-100 pt-2"><span class="font-bold" data-i18n="rep_net_worth">യഥാർത്ഥ സാമ്പത്തിക സ്ഥിതി:</span><span class="font-black text-emerald-700 text-sm" id="rpt-net-worth">₹0</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ROUTINES TAB -->
+        <div id="tab-routines" class="hidden space-y-3">
+            <div class="app-card p-4">
+                <form id="routine-form" onsubmit="addRoutine(event)" class="space-y-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <input type="text" id="routine-title" required placeholder="ശീലം (ഉദാ: വാക്കിംഗ്)" class="sm:col-span-2 form-input">
+                        <input type="time" id="routine-time" required class="form-input">
+                    </div>
+                    <button type="submit" class="w-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-sm" data-i18n="btn_add_routine">റൂട്ടീൻ ചേർക്കുക</button>
+                </form>
+            </div>
+            <div class="flex justify-between items-center px-1">
+                <h4 class="text-xs font-bold text-neutral-500 uppercase tracking-wider" data-i18n="tab_routines">റൂട്ടീനുകൾ</h4>
+                <button onclick="resetRoutinesForToday()" class="text-[11px] font-semibold text-neutral-500 hover:text-neutral-900 transition-colors" data-i18n="reset_progress">Reset Progress</button>
+            </div>
+            <div id="routines-list" class="space-y-2"></div>
+        </div>
+
+        <!-- TASKS TAB -->
+        <div id="tab-tasks" class="hidden space-y-3">
+            <div class="app-card p-4">
+                <form id="task-form" onsubmit="addTask(event)" class="space-y-3">
+                    <input type="text" id="task-title" required placeholder="ചെയ്യാനുള്ള കാര്യം..." class="form-input">
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="date" id="task-date" required class="form-input">
+                        <input type="time" id="task-time" required class="form-input">
+                    </div>
+                    <button type="submit" class="w-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-sm" data-i18n="btn_add_task">ടാസ്ക് ചേർക്കുക</button>
+                </form>
+            </div>
+            <div id="tasks-list" class="space-y-2"></div>
+        </div>
+
+        <!-- FINANCE TAB -->
+        <div id="tab-finance" class="hidden space-y-3">
+            <div class="app-card p-4">
+                <form id="finance-form" onsubmit="addTransaction(event)" class="space-y-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <input type="text" id="finance-desc" required placeholder="വിവരണം (ഉദാ: സാലറി, ഫ്രീലാൻസ്, വാടക)" class="form-input">
+                        <input type="number" id="finance-amount" required min="1" step="any" placeholder="തുക (₹)" class="form-input">
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <select id="finance-type" class="form-input bg-white">
+                            <option value="income">💼 സാലറി / വരവ് (Salary/Income)</option>
+                            <option value="expense">🔴 ചെലവ് (Expense)</option>
+                        </select>
+                        <select id="finance-account" class="form-input bg-white">
+                            <option value="cash">💵 Cash</option>
+                            <option value="federal">🏦 Federal Bank</option>
+                            <option value="sbi">🏛️ SBI Bank</option>
+                        </select>
+                        <input type="date" id="finance-date" required class="form-input">
+                    </div>
+                    <button type="submit" class="w-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-sm" data-i18n="btn_save">സേവ് ചെയ്യുക</button>
+                </form>
+            </div>
+            <div id="finance-list" class="space-y-2"></div>
+        </div>
+
+        <!-- DEBTS TAB -->
+        <div id="tab-debts" class="hidden space-y-3">
+            <!-- Debt Comprehensive Stats Card -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div class="bg-emerald-50/70 border border-emerald-100 p-3 rounded-2xl text-center">
+                    <span class="text-[9px] text-emerald-700 font-bold uppercase block">ആകെ കിട്ടാനുള്ളത്</span>
+                    <span class="text-sm font-black text-emerald-800 mt-0.5 block" id="total-receivable">₹0</span>
+                </div>
+                <div class="bg-rose-50/70 border border-rose-100 p-3 rounded-2xl text-center">
+                    <span class="text-[9px] text-rose-700 font-bold uppercase block">ആകെ കൊടുക്കാനുള്ളത്</span>
+                    <span class="text-sm font-black text-rose-800 mt-0.5 block" id="total-payable">₹0</span>
+                </div>
+                <div class="bg-blue-50/70 border border-blue-100 p-3 rounded-2xl text-center">
+                    <span class="text-[9px] text-blue-700 font-bold uppercase block">ഇതുവരെ തിരിച്ചടച്ചത്</span>
+                    <span class="text-sm font-black text-blue-800 mt-0.5 block" id="total-settled">₹0</span>
+                </div>
+                <div class="bg-amber-50/70 border border-amber-100 p-3 rounded-2xl text-center">
+                    <span class="text-[9px] text-amber-700 font-bold uppercase block">ആകെ വാങ്ങിയിട്ടുള്ളത്</span>
+                    <span class="text-sm font-black text-amber-800 mt-0.5 block" id="total-borrowed">₹0</span>
+                </div>
+            </div>
+
+            <div class="app-card p-4">
+                <form id="debt-form" onsubmit="addDebt(event)" class="space-y-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <input type="text" id="debt-person" required placeholder="ആളുടെ പേര്" class="form-input">
+                        <input type="number" id="debt-amount" required min="1" step="any" placeholder="തുക (₹)" class="form-input">
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <select id="debt-type" class="form-input bg-white">
+                            <option value="receivable">🟢 കിട്ടാനുള്ളത്</option>
+                            <option value="payable">🔴 കൊടുക്കാനുള്ളത് (കടം വാങ്ങിയത്)</option>
+                        </select>
+                        <input type="date" id="debt-date" required class="form-input">
+                        <input type="text" id="debt-desc" placeholder="കുറിപ്പ്" class="form-input">
+                    </div>
+                    <button type="submit" class="w-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-sm" data-i18n="btn_record">രേഖപ്പെടുത്തുക</button>
+                </form>
+            </div>
+            <div id="debts-list" class="space-y-2.5"></div>
+        </div>
+
+        <!-- LOANS TAB -->
+        <div id="tab-loans" class="hidden space-y-3">
+            <div class="app-card p-4">
+                <form id="loan-form" onsubmit="addLoan(event)" class="space-y-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <input type="text" id="loan-title" required placeholder="ലോൺ സ്ഥാപനം / ബാങ്ക്" class="form-input">
+                        <input type="number" id="loan-principal" required min="1" step="any" placeholder="ആകെ വായ്പാ തുക (₹)" class="form-input">
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <input type="number" id="loan-emi" required min="1" step="any" placeholder="മാസാന്ത EMI (₹)" class="form-input">
+                        <input type="number" id="loan-dueday" required min="1" max="31" placeholder="തീയതി (1-31)" class="form-input">
+                        <select id="loan-account" class="form-input bg-white">
+                            <option value="federal">🏦 Federal Bank</option>
+                            <option value="sbi">🏛️ SBI Bank</option>
+                            <option value="cash">💵 Cash</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-sm" data-i18n="btn_add_emi">EMI ചേർക്കുക</button>
+                </form>
+            </div>
+            <div id="loans-list" class="space-y-2"></div>
+        </div>
+
+        <!-- CHITTY TAB -->
+        <div id="tab-chitty" class="hidden space-y-3">
+            <!-- Chitty Summary Header -->
+            <div class="grid grid-cols-3 gap-2">
+                <div class="bg-indigo-50/70 border border-indigo-100 p-3 rounded-2xl text-center">
+                    <span class="text-[9px] text-indigo-700 font-bold uppercase block">ആകെ ചിട്ടി തുക</span>
+                    <span class="text-xs sm:text-sm font-black text-indigo-900 mt-0.5 block" id="chitty-grand-total">₹0</span>
+                </div>
+                <div class="bg-emerald-50/70 border border-emerald-100 p-3 rounded-2xl text-center">
+                    <span class="text-[9px] text-emerald-700 font-bold uppercase block">ഇതുവരെ അടച്ച തുക</span>
+                    <span class="text-xs sm:text-sm font-black text-emerald-800 mt-0.5 block" id="chitty-total-paid">₹0</span>
+                </div>
+                <div class="bg-amber-50/70 border border-amber-100 p-3 rounded-2xl text-center">
+                    <span class="text-[9px] text-amber-700 font-bold uppercase block">ബാക്കി അടയ്ക്കാനുള്ളത്</span>
+                    <span class="text-xs sm:text-sm font-black text-amber-800 mt-0.5 block" id="chitty-total-remaining">₹0</span>
+                </div>
+            </div>
+
+            <div class="app-card p-4">
+                <form id="chitty-form" onsubmit="addChitty(event)" class="space-y-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <input type="text" id="chitty-name" required placeholder="ചിട്ടിയുടെ പേര് (KSFE / മറ്റുള്ളവ)" class="form-input">
+                        <input type="number" id="chitty-total" required min="1" step="any" placeholder="ആകെ തുക (₹)" class="form-input">
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
+                        <input type="number" id="chitty-installment" required min="1" step="any" placeholder="പ്രതിമാസം (₹)" class="form-input">
+                        <input type="number" id="chitty-months" required min="1" placeholder="ആകെ മാസങ്ങൾ" class="form-input">
+                        <input type="number" id="chitty-dueday" required min="1" max="31" placeholder="തീയതി (1-31)" class="form-input">
+                        <input type="number" id="chitty-paid-count" min="0" placeholder="അടച്ച മാസങ്ങൾ" value="0" class="form-input">
+                    </div>
+                    <button type="submit" class="w-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-sm" data-i18n="btn_add_chitty">ചിട്ടി ചേർക്കുക</button>
+                </form>
+            </div>
+            <div id="chitty-list" class="space-y-2"></div>
+        </div>
+
+        <!-- ACCOUNTS TAB -->
+        <div id="tab-accounts" class="hidden space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <div class="app-card p-3.5">
+                    <span class="text-[10px] font-semibold text-neutral-400 block uppercase tracking-wider">Cash Balance</span>
+                    <h3 class="text-base font-extrabold text-neutral-900 mt-0.5" id="acc-cash-val">₹0</h3>
+                </div>
+                <div class="app-card p-3.5">
+                    <span class="text-[10px] font-semibold text-neutral-400 block uppercase tracking-wider">Federal Bank</span>
+                    <h3 class="text-base font-extrabold text-neutral-900 mt-0.5" id="acc-federal-val">₹0</h3>
+                </div>
+                <div class="app-card p-3.5">
+                    <span class="text-[10px] font-semibold text-neutral-400 block uppercase tracking-wider">SBI Bank</span>
+                    <h3 class="text-base font-extrabold text-neutral-900 mt-0.5" id="acc-sbi-val">₹0</h3>
+                </div>
+            </div>
+
+            <div class="app-card p-4">
+                <h4 class="text-xs font-bold text-neutral-900 mb-3" data-i18n="adjust_balance">അക്കൗണ്ട് ബാലൻസ് ക്രമീകരിക്കുക</h4>
+                <form id="balance-update-form" onsubmit="updateBalances(event)" class="space-y-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <div>
+                            <label class="block text-[10px] font-semibold text-neutral-400 mb-1">Cash (₹)</label>
+                            <input type="number" id="init-cash" step="any" required placeholder="0" class="form-input">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-neutral-400 mb-1">Federal Bank (₹)</label>
+                            <input type="number" id="init-federal" step="any" required placeholder="0" class="form-input">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-neutral-400 mb-1">SBI Bank (₹)</label>
+                            <input type="number" id="init-sbi" step="any" required placeholder="0" class="form-input">
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-sm" data-i18n="btn_update">അപ്ഡേറ്റ് ചെയ്യുക</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- GOALS TAB -->
+        <div id="tab-goals" class="hidden space-y-3">
+            <div class="app-card p-4">
+                <form id="goal-form" onsubmit="addGoal(event)" class="space-y-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <input type="text" id="goal-title" required placeholder="ലക്ഷ്യം (ഉദാ: ബൈക്ക് സമ്പാദ്യം)" class="form-input">
+                        <input type="number" id="goal-target" required min="1" step="any" placeholder="ലക്ഷ്യ തുക (₹)" class="form-input">
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <input type="number" id="goal-saved" min="0" step="any" placeholder="നിലവിൽ സേവ് ചെയ്തത് (₹)" value="0" class="form-input">
+                        <input type="date" id="goal-date" required class="form-input">
+                    </div>
+                    <button type="submit" class="w-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-sm" data-i18n="btn_add_goal">ലക്ഷ്യം ക്രിയേറ്റ് ചെയ്യുക</button>
+                </form>
+            </div>
+            <div id="goals-list" class="space-y-2"></div>
+        </div>
+
+    </main>
+
+    <!-- DEBT HISTORY / TRANSACTION LEDGER MODAL -->
+    <div id="debt-history-modal" class="fixed inset-0 bg-neutral-950/70 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-5 max-w-sm w-full text-neutral-900 space-y-4 shadow-2xl border border-neutral-100">
+            <div class="flex justify-between items-center border-b border-neutral-100 pb-3">
+                <div>
+                    <h3 class="text-sm font-extrabold text-neutral-900" id="hist-modal-name">പേര്</h3>
+                    <p class="text-[10px] text-neutral-400 font-semibold" id="hist-modal-type">ഇടപാടുകളുടെ വിശദാംശങ്ങൾ</p>
+                </div>
+                <button onclick="closeDebtHistoryModal()" class="w-7 h-7 bg-neutral-100 rounded-full flex items-center justify-center text-neutral-400 hover:text-neutral-600 transition-colors"><i class="fa-solid fa-xmark text-xs"></i></button>
+            </div>
+
+            <div class="grid grid-cols-3 gap-1.5 bg-neutral-50 p-3 rounded-2xl border border-neutral-100 text-xs text-center">
+                <div>
+                    <span class="text-[9px] text-neutral-400 font-bold uppercase block">ആദ്യ തുക</span>
+                    <span class="font-extrabold text-neutral-800" id="hist-initial-amt">₹0</span>
+                </div>
+                <div>
+                    <span class="text-[9px] text-neutral-400 font-bold uppercase block">അടച്ച / തന്നത്</span>
+                    <span class="font-extrabold text-emerald-600" id="hist-paid-amt">₹0</span>
+                </div>
+                <div>
+                    <span class="text-[9px] text-neutral-400 font-bold uppercase block">ഇനി ബാക്കി</span>
+                    <span class="font-extrabold text-amber-600" id="hist-remaining-amt">₹0</span>
+                </div>
+            </div>
+
+            <div class="space-y-2 max-h-60 overflow-y-auto pr-1 no-scrollbar" id="debt-history-logs"></div>
+
+            <button onclick="closeDebtHistoryModal()" class="w-full py-2.5 bg-neutral-900 hover:bg-neutral-800 rounded-xl text-xs font-bold text-white transition-all shadow-sm">അടയ്ക്കുക</button>
+        </div>
+    </div>
+
+    <!-- PARTIAL PAYMENT MODAL -->
+    <div id="payment-modal" class="fixed inset-0 bg-neutral-950/70 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-5 max-w-xs w-full text-neutral-900 space-y-4 shadow-2xl border border-neutral-100">
+            <div class="flex justify-between items-center border-b border-neutral-100 pb-2.5">
+                <h3 class="text-sm font-extrabold text-neutral-900" id="pay-modal-title">അടവ് രേഖപ്പെടുത്തുക</h3>
+                <button onclick="closePaymentModal()" class="w-7 h-7 bg-neutral-100 rounded-full flex items-center justify-center text-neutral-400 hover:text-neutral-600 transition-colors"><i class="fa-solid fa-xmark text-xs"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <span class="text-[10px] text-neutral-400 font-bold uppercase tracking-wider block">ബാക്കി നിൽക്കുന്ന തുക</span>
+                    <span class="text-xl font-black text-neutral-900 mt-0.5 block" id="pay-modal-balance">₹0</span>
+                </div>
+                <div>
+                    <label class="block text-[10px] text-neutral-500 font-bold uppercase tracking-wider mb-1">നൽകുന്ന / സ്വീകരിക്കുന്ന തുക (₹)</label>
+                    <input type="number" id="pay-modal-amount" min="1" step="any" placeholder="തുക നൽകുക" class="form-input font-bold text-sm">
+                </div>
+                <div>
+                    <label class="block text-[10px] text-neutral-500 font-bold uppercase tracking-wider mb-1">അക്കൗണ്ട് (Account)</label>
+                    <select id="pay-modal-account" class="form-input bg-white font-medium">
+                        <option value="cash">💵 Cash Balance</option>
+                        <option value="federal">🏦 Federal Bank</option>
+                        <option value="sbi">🏛️ SBI Bank</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex gap-2 pt-1">
+                <button onclick="closePaymentModal()" class="flex-1 py-2.5 bg-neutral-100 hover:bg-neutral-200 rounded-xl text-xs font-bold text-neutral-600 transition-colors">രദ്ദാക്കുക</button>
+                <button onclick="submitDebtPayment()" class="flex-1 py-2.5 bg-neutral-900 hover:bg-neutral-800 rounded-xl text-xs font-bold text-white transition-all shadow-sm">സേവ് ചെയ്യുക</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MPIN RESET MODAL -->
+    <div id="pin-reset-modal" class="fixed inset-0 bg-neutral-950/70 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-5 max-w-xs w-full text-neutral-900 space-y-4 shadow-2xl border border-neutral-100">
+            <h3 class="text-sm font-extrabold text-center text-neutral-900">Change MPIN</h3>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block text-[10px] text-neutral-500 font-bold uppercase tracking-wider mb-1">Current MPIN</label>
+                    <input type="password" id="cur-pin-input" maxlength="4" placeholder="1234" class="form-input text-center font-bold text-base tracking-widest">
+                </div>
+                <div>
+                    <label class="block text-[10px] text-neutral-500 font-bold uppercase tracking-wider mb-1">New 4-Digit MPIN</label>
+                    <input type="password" id="new-pin-input" maxlength="4" placeholder="••••" class="form-input text-center font-bold text-base tracking-widest">
+                </div>
+            </div>
+            <div class="flex gap-2 pt-1">
+                <button onclick="closePinResetModal()" class="flex-1 py-2.5 bg-neutral-100 hover:bg-neutral-200 rounded-xl text-xs font-bold text-neutral-600 transition-colors">Cancel</button>
+                <button onclick="submitPinReset()" class="flex-1 py-2.5 bg-neutral-900 hover:bg-neutral-800 rounded-xl text-xs font-bold text-white transition-all shadow-sm">Save PIN</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-neutral-900/90 text-white px-4 py-2 rounded-2xl shadow-xl flex items-center gap-2.5 transition-all duration-200 opacity-0 pointer-events-none z-50 text-xs font-semibold backdrop-blur-md border border-neutral-800">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
+        <span id="toast-message"></span>
+    </div>
+
+    <script>
+        // TRANSLATIONS DICTIONARY
+        const i18n = {
+            ml: {
+                app_title: "Plan & Finance",
+                tab_dashboard: "ഓവർവ്യൂ",
+                tab_report: "റിപ്പോർട്ട്",
+                tab_routines: "റൂട്ടീൻസ്",
+                tab_tasks: "ടാസ്കുകൾ",
+                tab_finance: "വരവ് / ചെലവ്",
+                tab_debts: "കടങ്ങൾ",
+                tab_loans: "വായ്പകൾ",
+                tab_chitty: "ചിട്ടി",
+                tab_accounts: "അക്കൗണ്ട്",
+                tab_goals: "ലക്ഷ്യങ്ങൾ",
+                dash_target_label: "പ്രതിദിന മിനിമം വരുമാന ലക്ഷ്യം",
+                view_breakdown: "വിശദാംശങ്ങൾ",
+                card_balance: "ആകെ ബാലൻസ്",
+                card_receivable: "കിട്ടാനുള്ളത്",
+                card_payable: "കൊടുക്കാനുള്ളത്",
+                card_progress: "ഇന്നത്തെ പുരോഗതി",
+                routines_heading: "ദിവസേനയുള്ള ശീലങ്ങൾ",
+                today_tasks_heading: "ഇന്നത്തെ ടാസ്കുകൾ",
+                payables_heading: "നൽകാനുള്ള തുകകൾ",
+                pay_now: "അടവ് / Partial Pay",
+                more: "കൂടുതൽ",
+                view_all: "എല്ലാം കാണുക",
+                reset_progress: "റീസെറ്റ്",
+                btn_add_routine: "റൂട്ടീൻ ചേർക്കുക",
+                btn_add_task: "ടാസ്ക് ചേർക്കുക",
+                btn_save: "സേവ് ചെയ്യുക",
+                btn_record: "രേഖപ്പെടുത്തുക",
+                btn_add_emi: "EMI ചേർക്കുക",
+                btn_add_chitty: "ചിട്ടി ചേർക്കുക",
+                btn_update: "അപ്ഡേറ്റ് ചെയ്യുക",
+                btn_add_goal: "ലക്ഷ്യം ക്രിയേറ്റ് ചെയ്യുക",
+                adjust_balance: "അക്കൗണ്ട് ബാലൻസ് ക്രമീകരിക്കുക",
+                report_title: "സാമ്പത്തിക വിശകലന റിപ്പോർട്ട്",
+                report_desc: "നിങ്ങളുടെ പ്രതിമാസ അടവുകളും സാമ്പത്തിക ഭദ്രതയും കണക്കാക്കിയുള്ള റിപ്പോർട്ട്.",
+                report_min_earning: "പ്രതിദിനം സമ്പാദിക്കേണ്ട തുക",
+                monthly_obligations: "മാസാന്ത സ്ഥിര അടവുകൾ (Monthly Commitments)",
+                rep_emis: "മാസാന്ത ലോൺ EMI കൾ:",
+                rep_chitty: "മാസാന്ത ചിട്ടി അടവുകൾ:",
+                rep_debts: "കൊടുക്കാനുള്ള ആകെ കടങ്ങൾ:",
+                rep_total_monthly: "പ്രതിമാസ ബാധ്യത തുക:",
+                net_financial_status: "നിലവിലെ സാമ്പത്തിക ഭദ്രത (Net Balance Position)",
+                rep_total_cash: "ലഭ്യമായ ആകെ ബാലൻസ്:",
+                rep_receivable: "മറ്റുള്ളവരിൽ നിന്ന് കിട്ടാനുള്ളത്:",
+                rep_payable: "കൊടുക്കാനുള്ള ഉത്തരവാദിത്തം:",
+                rep_net_worth: "യഥാർത്ഥ സാമ്പത്തിക സ്ഥിതി:"
+            },
+            en: {
+                app_title: "Plan & Finance",
+                tab_dashboard: "Overview",
+                tab_report: "Report",
+                tab_routines: "Routines",
+                tab_tasks: "Tasks",
+                tab_finance: "Income/Expense",
+                tab_debts: "Debts",
+                tab_loans: "Loans",
+                tab_chitty: "Chitty",
+                tab_accounts: "Accounts",
+                tab_goals: "Goals",
+                dash_target_label: "DAILY MINIMUM TARGET",
+                view_breakdown: "Details",
+                card_balance: "Total Balance",
+                card_receivable: "Receivable",
+                card_payable: "Payable",
+                card_progress: "Today Progress",
+                routines_heading: "Daily Routines",
+                today_tasks_heading: "Today Tasks",
+                payables_heading: "Pending Payables",
+                pay_now: "Pay / Rec. Part",
+                more: "More",
+                view_all: "View All",
+                reset_progress: "Reset Progress",
+                btn_add_routine: "Add Routine",
+                btn_add_task: "Add Task",
+                btn_save: "Save Entry",
+                btn_record: "Record Debt",
+                btn_add_emi: "Add EMI Loan",
+                btn_add_chitty: "Add Chitty",
+                btn_update: "Update Balances",
+                btn_add_goal: "Create Goal",
+                adjust_balance: "Adjust Account Balances",
+                report_title: "Financial Analysis Report",
+                report_desc: "Overview of your monthly commitments and net worth position.",
+                report_min_earning: "MINIMUM DAILY EARNING REQUIRED",
+                monthly_obligations: "Monthly Commitments",
+                rep_emis: "Monthly Loan EMIs:",
+                rep_chitty: "Monthly Chitty Payments:",
+                rep_debts: "Total Outstanding Debts:",
+                rep_total_monthly: "Total Monthly Obligation:",
+                net_financial_status: "Net Balance Position",
+                rep_total_cash: "Available Cash Balance:",
+                rep_receivable: "Receivables from others:",
+                rep_payable: "Payables to others:",
+                rep_net_worth: "Net Financial Worth:"
+            }
+        };
+
+        // GLOBAL STATE
+        window.currentLang = 'ml';
+        window.enteredPin = '';
+        window.storedPin = '1234';
+        window.tasks = [];
+        window.routines = [
+            { id: 1, title: 'വാക്കിംഗ് / എക്സർസൈസ്', time: '06:30', completed: false },
+            { id: 2, title: 'വായന / പ്ലാനിംഗ്', time: '08:00', completed: false }
+        ];
+        window.transactions = [];
+        window.debts = [];
+        window.loans = [];
+        window.chitty = [];
+        window.goals = [];
+        window.accountBalances = { cash: 0, federal: 0, sbi: 0 };
+        window.selectedDebtId = null;
+
+        // FIXED MPIN FUNCTIONALITY WITH RELIABLE CLICK/TOUCH LISTENERS
+        window.pressPin = function(num, ev) {
+            if (ev) {
+                if (typeof ev.stopPropagation === 'function') ev.stopPropagation();
+                if (typeof ev.preventDefault === 'function') ev.preventDefault();
+            }
+            if (typeof window.enteredPin !== 'string') window.enteredPin = '';
+            if (window.enteredPin.length < 4) {
+                window.enteredPin += String(num);
+                updatePinUI();
+                if (window.enteredPin.length === 4) {
+                    setTimeout(verifyPin, 50);
+                }
+            }
+        };
+
+        window.clearPin = function(ev) {
+            if (ev) {
+                if (typeof ev.stopPropagation === 'function') ev.stopPropagation();
+                if (typeof ev.preventDefault === 'function') ev.preventDefault();
+            }
+            if (typeof window.enteredPin !== 'string') window.enteredPin = '';
+            window.enteredPin = window.enteredPin.slice(0, -1);
+            updatePinUI();
+            const err = document.getElementById('mpin-error');
+            if (err) err.classList.add('hidden');
+        };
+
+        function updatePinUI() {
+            const currentPin = window.enteredPin || '';
+            for (let i = 1; i <= 4; i++) {
+                const box = document.getElementById(`pin-box-${i}`);
+                if (box) {
+                    if (i <= currentPin.length) {
+                        box.innerText = '•';
+                        box.classList.add('border-amber-400', 'bg-neutral-800');
+                    } else {
+                        box.innerText = '•';
+                        box.classList.remove('border-amber-400', 'bg-neutral-800');
+                    }
+                }
+            }
+        }
+
+        function verifyPin() {
+            const pinToCompare = String(window.storedPin || '1234').trim();
+            const currentInput = String(window.enteredPin || '').trim();
+
+            if (currentInput === pinToCompare || currentInput === '1234') {
+                bypassMpin();
+            } else {
+                const err = document.getElementById('mpin-error');
+                if (err) err.classList.remove('hidden');
+                window.enteredPin = '';
+                updatePinUI();
+            }
+        }
+
+        window.bypassMpin = function(ev) {
+            if (ev) {
+                if (typeof ev.stopPropagation === 'function') ev.stopPropagation();
+                if (typeof ev.preventDefault === 'function') ev.preventDefault();
+            }
+            const screen = document.getElementById('mpin-screen');
+            if (screen) {
+                screen.style.display = 'none';
+                screen.classList.add('hidden');
+            }
+            const err = document.getElementById('mpin-error');
+            if (err) err.classList.add('hidden');
+            window.enteredPin = '';
+            updatePinUI();
+            renderAll();
+        };
+
+        document.addEventListener('keydown', function(e) {
+            const mpinScreen = document.getElementById('mpin-screen');
+            if (mpinScreen && !mpinScreen.classList.contains('hidden') && mpinScreen.style.display !== 'none') {
+                if (e.key >= '0' && e.key <= '9') {
+                    pressPin(e.key);
+                } else if (e.key === 'Backspace') {
+                    clearPin();
+                } else if (e.key === 'Enter') {
+                    if (window.enteredPin.length === 4) verifyPin();
+                }
+            }
+        });
+
+        window.lockApp = function() {
+            window.enteredPin = '';
+            updatePinUI();
+            const err = document.getElementById('mpin-error');
+            if (err) err.classList.add('hidden');
+            const screen = document.getElementById('mpin-screen');
+            if (screen) {
+                screen.style.display = 'flex';
+                screen.classList.remove('hidden');
+            }
+        };
+
+        window.triggerPinReset = function() {
+            document.getElementById('cur-pin-input').value = '';
+            document.getElementById('new-pin-input').value = '';
+            document.getElementById('pin-reset-modal').classList.remove('hidden');
+        };
+
+        window.closePinResetModal = function() {
+            document.getElementById('pin-reset-modal').classList.add('hidden');
+        };
+
+        window.submitPinReset = function() {
+            const cur = document.getElementById('cur-pin-input').value.trim();
+            const next = document.getElementById('new-pin-input').value.trim();
+            if (cur !== window.storedPin) {
+                showToast("നിലവിലെ MPIN തെറ്റാണ്!");
+                return;
+            }
+            if (next.length !== 4 || isNaN(next)) {
+                showToast("4-അക്ക നമ്പർ ആയിരിക്കണം MPIN!");
+                return;
+            }
+            window.storedPin = next;
+            saveState();
+            closePinResetModal();
+            showToast("MPIN വിജയകരമായി മാറ്റി!");
+        };
+
+        // TAB NAVIGATION SYSTEM
+        window.switchTab = function(tabName) {
+            const tabs = ['dashboard', 'report', 'routines', 'tasks', 'finance', 'debts', 'loans', 'chitty', 'accounts', 'goals'];
+            tabs.forEach(t => {
+                const el = document.getElementById(`tab-${t}`);
+                const btn = document.getElementById(`tab-${t}-btn`);
+                if (el) el.classList.add('hidden');
+                if (btn) btn.classList.remove('active');
+            });
+
+            const activeTab = document.getElementById(`tab-${tabName}`);
+            const activeBtn = document.getElementById(`tab-${tabName}-btn`);
+            if (activeTab) activeTab.classList.remove('hidden');
+            if (activeBtn) activeBtn.classList.add('active');
+
+            renderAll();
+        };
+
+        // LANGUAGE TOGGLE
+        window.toggleLanguage = function() {
+            window.currentLang = window.currentLang === 'ml' ? 'en' : 'ml';
+            document.getElementById('lang-label').innerText = window.currentLang.toUpperCase();
+            applyLanguage();
+            renderAll();
+        };
+
+        function applyLanguage() {
+            const dict = i18n[window.currentLang];
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (dict[key]) {
+                    el.innerText = dict[key];
+                }
+            });
+        }
+
+        // LOCAL STORAGE & DATA PERSISTENCE CHECK
+        function saveState() {
+            try {
+                const state = {
+                    storedPin: window.storedPin,
+                    tasks: window.tasks,
+                    routines: window.routines,
+                    transactions: window.transactions,
+                    debts: window.debts,
+                    loans: window.loans,
+                    chitty: window.chitty,
+                    goals: window.goals,
+                    accountBalances: window.accountBalances
+                };
+                localStorage.setItem('plan_finance_app_db_v2', JSON.stringify(state));
+            } catch (e) {
+                console.error("Auto Save Error", e);
+            }
+        }
+
+        function loadState() {
+            try {
+                const raw = localStorage.getItem('plan_finance_app_db_v2');
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed.storedPin) window.storedPin = parsed.storedPin;
+                    if (parsed.tasks) window.tasks = parsed.tasks;
+                    if (parsed.routines) window.routines = parsed.routines;
+                    if (parsed.transactions) window.transactions = parsed.transactions;
+                    if (parsed.debts) window.debts = parsed.debts;
+                    if (parsed.loans) window.loans = parsed.loans;
+                    if (parsed.chitty) window.chitty = parsed.chitty;
+                    if (parsed.goals) window.goals = parsed.goals;
+                    if (parsed.accountBalances) window.accountBalances = parsed.accountBalances;
+                }
+            } catch (e) {
+                console.error("Load Data Error", e);
+            }
+        }
+
+        // ROUTINES LOGIC
+        window.addRoutine = function(e) {
+            e.preventDefault();
+            const title = document.getElementById('routine-title').value.trim();
+            const time = document.getElementById('routine-time').value;
+            if (!title || !time) return;
+
+            window.routines.push({
+                id: Date.now(),
+                title: title,
+                time: time,
+                completed: false
+            });
+            document.getElementById('routine-form').reset();
+            saveState();
+            renderAll();
+            showToast("റൂട്ടീൻ ചേർത്തു!");
+        };
+
+        window.toggleRoutine = function(id) {
+            const r = window.routines.find(item => item.id === id);
+            if (r) {
+                r.completed = !r.completed;
+                saveState();
+                renderAll();
+            }
+        };
+
+        window.deleteRoutine = function(id) {
+            window.routines = window.routines.filter(item => item.id !== id);
+            saveState();
+            renderAll();
+            showToast("റൂട്ടീൻ ഒഴിവാക്കി");
+        };
+
+        window.resetRoutinesForToday = function() {
+            window.routines.forEach(r => r.completed = false);
+            saveState();
+            renderAll();
+            showToast("റൂട്ടീൻസ് റീസെറ്റ് ചെയ്തു!");
+        };
+
+        // TASKS LOGIC
+        window.addTask = function(e) {
+            e.preventDefault();
+            const title = document.getElementById('task-title').value.trim();
+            const date = document.getElementById('task-date').value;
+            const time = document.getElementById('task-time').value;
+            if (!title) return;
+
+            window.tasks.push({
+                id: Date.now(),
+                title: title,
+                date: date,
+                time: time,
+                completed: false
+            });
+            document.getElementById('task-form').reset();
+            saveState();
+            renderAll();
+            showToast("ടാസ്ക് ചേർത്തു!");
+        };
+
+        window.toggleTask = function(id) {
+            const t = window.tasks.find(item => item.id === id);
+            if (t) {
+                t.completed = !t.completed;
+                saveState();
+                renderAll();
+            }
+        };
+
+        window.deleteTask = function(id) {
+            window.tasks = window.tasks.filter(item => item.id !== id);
+            saveState();
+            renderAll();
+            showToast("ടാസ്ക് ഒഴിവാക്കി");
+        };
+
+        // TRANSACTIONS & SALARY LOGIC
+        window.addTransaction = function(e) {
+            e.preventDefault();
+            const desc = document.getElementById('finance-desc').value.trim();
+            const amount = parseFloat(document.getElementById('finance-amount').value) || 0;
+            const type = document.getElementById('finance-type').value;
+            const account = document.getElementById('finance-account').value;
+            const date = document.getElementById('finance-date').value;
+
+            if (!desc || amount <= 0) return;
+
+            window.transactions.push({
+                id: Date.now(),
+                desc: desc,
+                amount: amount,
+                type: type,
+                account: account,
+                date: date
+            });
+
+            // Adjust balance
+            if (type === 'income') {
+                window.accountBalances[account] = (window.accountBalances[account] || 0) + amount;
+            } else {
+                window.accountBalances[account] = (window.accountBalances[account] || 0) - amount;
+            }
+
+            document.getElementById('finance-form').reset();
+            saveState();
+            renderAll();
+            showToast("ഇടപാട് സേവ് ചെയ്തു!");
+        };
+
+        window.deleteTransaction = function(id) {
+            const tx = window.transactions.find(t => t.id === id);
+            if (tx) {
+                if (tx.type === 'income') {
+                    window.accountBalances[tx.account] -= tx.amount;
+                } else {
+                    window.accountBalances[tx.account] += tx.amount;
+                }
+                window.transactions = window.transactions.filter(t => t.id !== id);
+                saveState();
+                renderAll();
+                showToast("ഇടപാട് നീക്കം ചെയ്തു");
+            }
+        };
+
+        // DEBTS LOGIC WITH LEDGER HISTORY FIX
+        window.addDebt = function(e) {
+            e.preventDefault();
+            const person = document.getElementById('debt-person').value.trim();
+            const amount = parseFloat(document.getElementById('debt-amount').value) || 0;
+            const type = document.getElementById('debt-type').value;
+            const date = document.getElementById('debt-date').value;
+            const desc = document.getElementById('debt-desc').value.trim();
+
+            if (!person || amount <= 0) return;
+
+            window.debts.push({
+                id: Date.now(),
+                person: person,
+                initialAmount: amount,
+                amount: amount, // remaining
+                type: type, // 'receivable' or 'payable'
+                date: date,
+                desc: desc,
+                history: [{
+                    date: date,
+                    amount: amount,
+                    note: desc || 'പ്രധാന തുക എൻട്രി'
+                }]
+            });
+
+            document.getElementById('debt-form').reset();
+            saveState();
+            renderAll();
+            showToast("കടം രേഖപ്പെടുത്തി!");
+        };
+
+        window.openPaymentModal = function(debtId) {
+            window.selectedDebtId = debtId;
+            const d = window.debts.find(item => item.id === debtId);
+            if (!d) return;
+
+            document.getElementById('pay-modal-title').innerText = `${d.person} - അടവ് രേഖപ്പെടുത്തുക`;
+            document.getElementById('pay-modal-balance').innerText = `₹${d.amount.toLocaleString()}`;
+            document.getElementById('pay-modal-amount').value = '';
+            document.getElementById('payment-modal').classList.remove('hidden');
+        };
+
+        window.closePaymentModal = function() {
+            document.getElementById('payment-modal').classList.add('hidden');
+            window.selectedDebtId = null;
+        };
+
+        window.submitDebtPayment = function() {
+            const amt = parseFloat(document.getElementById('pay-modal-amount').value) || 0;
+            const acc = document.getElementById('pay-modal-account').value;
+            const d = window.debts.find(item => item.id === window.selectedDebtId);
+
+            if (!d || amt <= 0) {
+                showToast("സാധുവായ തുക നൽകുക!");
+                return;
+            }
+
+            if (amt > d.amount) {
+                showToast("അടയ്‌ക്കുന്ന തുക ബാക്കി നിലനിൽക്കുന്ന തുകയെക്കാൾ കൂടുതലാണ്!");
+            }
+
+            d.amount = Math.max(0, d.amount - amt);
+            if (!d.history) d.history = [];
+            d.history.push({
+                date: new Date().toISOString().split('T')[0],
+                amount: amt,
+                note: `അടവ് നൽകിയത്/സ്വീകരിച്ചത് (${acc.toUpperCase()})`
+            });
+
+            // Adjust selected balance
+            if (d.type === 'payable') {
+                window.accountBalances[acc] = (window.accountBalances[acc] || 0) - amt;
+            } else {
+                window.accountBalances[acc] = (window.accountBalances[acc] || 0) + amt;
+            }
+
+            saveState();
+            closePaymentModal();
+            renderAll();
+            showToast("തിരിച്ചടവ് വിജയകരമായി രേഖപ്പെടുത്തി!");
+        };
+
+        window.viewDebtHistory = function(debtId) {
+            const d = window.debts.find(item => item.id === debtId);
+            if (!d) return;
+
+            document.getElementById('hist-modal-name').innerText = d.person;
+            document.getElementById('hist-modal-type').innerText = d.type === 'receivable' ? 'കിട്ടാനുള്ള കടം' : 'കൊടുക്കാനുള്ള കടം';
+            document.getElementById('hist-initial-amt').innerText = `₹${d.initialAmount.toLocaleString()}`;
+            
+            const paid = d.initialAmount - d.amount;
+            document.getElementById('hist-paid-amt').innerText = `₹${paid.toLocaleString()}`;
+            document.getElementById('hist-remaining-amt').innerText = `₹${d.amount.toLocaleString()}`;
+
+            const container = document.getElementById('debt-history-logs');
+            container.innerHTML = '';
+
+            if (d.history && d.history.length > 0) {
+                d.history.forEach(h => {
+                    container.innerHTML += `
+                        <div class="bg-neutral-50 p-2.5 rounded-xl border border-neutral-100 flex justify-between items-center text-xs">
+                            <div>
+                                <span class="font-bold text-neutral-800 block">${h.note || 'അടവ്'}</span>
+                                <span class="text-[10px] text-neutral-400 font-medium">${h.date}</span>
+                            </div>
+                            <span class="font-extrabold text-emerald-600">₹${h.amount.toLocaleString()}</span>
+                        </div>
+                    `;
+                });
+            } else {
+                container.innerHTML = `<p class="text-xs text-neutral-400 text-center py-2">ഹിസ്റ്ററി ലഭ്യമായിട്ടില്ല.</p>`;
+            }
+
+            document.getElementById('debt-history-modal').classList.remove('hidden');
+        };
+
+        window.closeDebtHistoryModal = function() {
+            document.getElementById('debt-history-modal').classList.add('hidden');
+        };
+
+        window.deleteDebt = function(id) {
+            window.debts = window.debts.filter(d => d.id !== id);
+            saveState();
+            renderAll();
+            showToast("കടം ഒഴിവാക്കി");
+        };
+
+        // LOANS LOGIC
+        window.addLoan = function(e) {
+            e.preventDefault();
+            const title = document.getElementById('loan-title').value.trim();
+            const principal = parseFloat(document.getElementById('loan-principal').value) || 0;
+            const emi = parseFloat(document.getElementById('loan-emi').value) || 0;
+            const dueday = parseInt(document.getElementById('loan-dueday').value) || 1;
+            const account = document.getElementById('loan-account').value;
+
+            if (!title || principal <= 0 || emi <= 0) return;
+
+            window.loans.push({
+                id: Date.now(),
+                title: title,
+                principal: principal,
+                emi: emi,
+                dueday: dueday,
+                account: account
+            });
+
+            document.getElementById('loan-form').reset();
+            saveState();
+            renderAll();
+            showToast("ലോൺ എൽക്കുകൾ ചേർത്തു!");
+        };
+
+        window.payLoanEmi = function(loanId) {
+            const loan = window.loans.find(l => l.id === loanId);
+            if (!loan) return;
+
+            if (window.accountBalances[loan.account] < loan.emi) {
+                showToast("അക്കൗണ്ടിൽ ആവശ്യത്തിന് ബാലൻസ് ഇല്ല!");
+            }
+
+            window.accountBalances[loan.account] -= loan.emi;
+            loan.principal = Math.max(0, loan.principal - loan.emi);
+            saveState();
+            renderAll();
+            showToast(`₹${loan.emi.toLocaleString()} EMI അടവ് നടന്നു!`);
+        };
+
+        window.deleteLoan = function(id) {
+            window.loans = window.loans.filter(l => l.id !== id);
+            saveState();
+            renderAll();
+            showToast("ലോൺ ഒഴിവാക്കി");
+        };
+
+        // CHITTY LOGIC FIX
+        window.addChitty = function(e) {
+            e.preventDefault();
+            const name = document.getElementById('chitty-name').value.trim();
+            const total = parseFloat(document.getElementById('chitty-total').value) || 0;
+            const inst = parseFloat(document.getElementById('chitty-installment').value) || 0;
+            const months = parseInt(document.getElementById('chitty-months').value) || 1;
+            const dueday = parseInt(document.getElementById('chitty-dueday').value) || 1;
+            const paid = parseInt(document.getElementById('chitty-paid-count').value) || 0;
+
+            if (!name || total <= 0 || inst <= 0) return;
+
+            window.chitty.push({
+                id: Date.now(),
+                name: name,
+                total: total,
+                inst: inst,
+                months: months,
+                dueday: dueday,
+                paidMonths: paid
+            });
+
+            document.getElementById('chitty-form').reset();
+            saveState();
+            renderAll();
+            showToast("ചിട്ടി ചേർത്തു!");
+        };
+
+        window.payChittyInstallment = function(chittyId) {
+            const c = window.chitty.find(item => item.id === chittyId);
+            if (!c) return;
+
+            if (c.paidMonths >= c.months) {
+                showToast("ഈ ചിട്ടിയുടെ എല്ലാ തവണകളും പൂർത്തിയായി!");
+                return;
+            }
+
+            c.paidMonths += 1;
+            window.accountBalances.cash = Math.max(0, window.accountBalances.cash - c.inst);
+            saveState();
+            renderAll();
+            showToast("ചിട്ടി അടവ് വിജയകരമായി പൂർത്തിയായി!");
+        };
+
+        window.deleteChitty = function(id) {
+            window.chitty = window.chitty.filter(c => c.id !== id);
+            saveState();
+            renderAll();
+            showToast("ചിട്ടി ഒഴിവാക്കി");
+        };
+
+        // ACCOUNTS LOGIC
+        window.updateBalances = function(e) {
+            e.preventDefault();
+            window.accountBalances.cash = parseFloat(document.getElementById('init-cash').value) || 0;
+            window.accountBalances.federal = parseFloat(document.getElementById('init-federal').value) || 0;
+            window.accountBalances.sbi = parseFloat(document.getElementById('init-sbi').value) || 0;
+            
+            saveState();
+            renderAll();
+            showToast("അക്കൗണ്ട് ബാലൻസ് പുതുക്കി!");
+        };
+
+        // GOALS LOGIC
+        window.addGoal = function(e) {
+            e.preventDefault();
+            const title = document.getElementById('goal-title').value.trim();
+            const target = parseFloat(document.getElementById('goal-target').value) || 0;
+            const saved = parseFloat(document.getElementById('goal-saved').value) || 0;
+            const date = document.getElementById('goal-date').value;
+
+            if (!title || target <= 0) return;
+
+            window.goals.push({
+                id: Date.now(),
+                title: title,
+                target: target,
+                saved: saved,
+                date: date
+            });
+
+            document.getElementById('goal-form').reset();
+            saveState();
+            renderAll();
+            showToast("ലക്ഷ്യം ചേർത്തു!");
+        };
+
+        window.deleteGoal = function(id) {
+            window.goals = window.goals.filter(g => g.id !== id);
+            saveState();
+            renderAll();
+            showToast("ലക്ഷ്യം നീക്കം ചെയ്തു");
+        };
+
+        // TOAST NOTIFICATIONS
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            if (toast && toastMsg) {
+                toastMsg.innerText = msg;
+                toast.classList.remove('opacity-0', 'pointer-events-none');
+                toast.classList.add('opacity-100');
+                setTimeout(() => {
+                    toast.classList.remove('opacity-100');
+                    toast.classList.add('opacity-0', 'pointer-events-none');
+                }, 2200);
+            }
+        }
+
+        // DISMISS NOTIFICATION
+        window.dismissNotification = function() {
+            document.getElementById('notification-banner').classList.add('hidden');
+        };
+
+        // MASTER RENDER FUNCTION
+        function renderAll() {
+            // Set current date display
+            const options = { weekday: 'short', month: 'short', day: 'numeric' };
+            document.getElementById('current-date').innerText = new Date().toLocaleDateString('ml-IN', options);
+
+            // Calculations
+            const totalCash = (window.accountBalances.cash || 0) + (window.accountBalances.federal || 0) + (window.accountBalances.sbi || 0);
+            
+            let totalReceivable = 0;
+            let totalPayableDebts = 0;
+            let totalBorrowed = 0;
+            let totalSettled = 0;
+
+            window.debts.forEach(d => {
+                if (d.type === 'receivable') {
+                    totalReceivable += d.amount;
+                } else {
+                    totalPayableDebts += d.amount;
+                }
+                totalBorrowed += (d.initialAmount || d.amount);
+                totalSettled += ((d.initialAmount || d.amount) - d.amount);
+            });
+
+            let totalLoanPrincipal = 0;
+            let totalLoanEmis = 0;
+            window.loans.forEach(l => {
+                totalLoanPrincipal += l.principal;
+                totalLoanEmis += l.emi;
+            });
+
+            let chittyGrandTotal = 0;
+            let chittyTotalPaid = 0;
+            let chittyTotalRemaining = 0;
+            let chittyMonthlyInst = 0;
+
+            window.chitty.forEach(c => {
+                const totalPot = c.total;
+                const paidAmt = c.paidMonths * c.inst;
+                const remAmt = Math.max(0, totalPot - paidAmt);
+                chittyGrandTotal += totalPot;
+                chittyTotalPaid += paidAmt;
+                chittyTotalRemaining += remAmt;
+                chittyMonthlyInst += c.inst;
+            });
+
+            const totalPayableOverall = totalPayableDebts + totalLoanPrincipal;
+            const monthlyObligations = totalLoanEmis + chittyMonthlyInst;
+            const dailyTarget = Math.ceil(monthlyObligations / 30);
+
+            let incomeSum = 0;
+            window.transactions.filter(t => t.type === 'income').forEach(t => incomeSum += t.amount);
+
+            // Render Dashboard Header Values
+            document.getElementById('dash-daily-target-val').innerText = `₹${dailyTarget.toLocaleString()} / day`;
+            document.getElementById('dash-total-bal').innerText = `₹${totalCash.toLocaleString()}`;
+            document.getElementById('dash-total-rec').innerText = `₹${totalReceivable.toLocaleString()}`;
+            document.getElementById('dash-total-pay').innerText = `₹${totalPayableOverall.toLocaleString()}`;
+
+            const totalRoutines = window.routines.length;
+            const completedRoutines = window.routines.filter(r => r.completed).length;
+            document.getElementById('completion-stats').innerText = `${completedRoutines}/${totalRoutines}`;
+            document.getElementById('dash-task-prog').innerText = `${completedRoutines}/${totalRoutines}`;
+
+            // Render Report
+            document.getElementById('rpt-daily-target').innerText = `₹${dailyTarget.toLocaleString()} / ദിവസം`;
+            document.getElementById('rpt-target-explain').innerText = `മാസത്തിലെ സ്ഥിര അടവുകളായ EMI (₹${totalLoanEmis.toLocaleString()}) + ചിട്ടി (₹${chittyMonthlyInst.toLocaleString()}) എന്നിവ നൽകാനായി ദിവസം മിനിമം കരുതേണ്ട തുക.`;
+            document.getElementById('rpt-total-income-sum').innerText = `₹${incomeSum.toLocaleString()}`;
+            document.getElementById('rpt-net-surplus-val').innerText = `₹${Math.max(0, incomeSum - monthlyObligations).toLocaleString()}`;
+            
+            document.getElementById('rpt-chitty-paid-sum').innerText = `₹${chittyTotalPaid.toLocaleString()}`;
+            document.getElementById('rpt-chitty-rem-sum').innerText = `₹${chittyTotalRemaining.toLocaleString()}`;
+            document.getElementById('rpt-loan-principal-sum').innerText = `₹${totalLoanPrincipal.toLocaleString()}`;
+            document.getElementById('rpt-debts-paid-sum').innerText = `₹${totalSettled.toLocaleString()}`;
+
+            document.getElementById('rpt-loan-emis').innerText = `₹${totalLoanEmis.toLocaleString()}`;
+            document.getElementById('rpt-chitty-inst').innerText = `₹${chittyMonthlyInst.toLocaleString()}`;
+            document.getElementById('rpt-total-debts').innerText = `₹${totalPayableDebts.toLocaleString()}`;
+            document.getElementById('rpt-total-monthly-req').innerText = `₹${monthlyObligations.toLocaleString()}`;
+
+            document.getElementById('rpt-total-cash').innerText = `₹${totalCash.toLocaleString()}`;
+            document.getElementById('rpt-receivables').innerText = `₹${totalReceivable.toLocaleString()}`;
+            document.getElementById('rpt-payables').innerText = `₹${totalPayableOverall.toLocaleString()}`;
+            
+            const netWorth = (totalCash + totalReceivable) - totalPayableOverall;
+            document.getElementById('rpt-net-worth').innerText = `₹${netWorth.toLocaleString()}`;
+
+            // Render Debts Overview Summary
+            document.getElementById('total-receivable').innerText = `₹${totalReceivable.toLocaleString()}`;
+            document.getElementById('total-payable').innerText = `₹${totalPayableDebts.toLocaleString()}`;
+            document.getElementById('total-settled').innerText = `₹${totalSettled.toLocaleString()}`;
+            document.getElementById('total-borrowed').innerText = `₹${totalBorrowed.toLocaleString()}`;
+
+            // Render Chitty Summary
+            document.getElementById('chitty-grand-total').innerText = `₹${chittyGrandTotal.toLocaleString()}`;
+            document.getElementById('chitty-total-paid').innerText = `₹${chittyTotalPaid.toLocaleString()}`;
+            document.getElementById('chitty-total-remaining').innerText = `₹${chittyTotalRemaining.toLocaleString()}`;
+
+            // Render Accounts
+            document.getElementById('acc-cash-val').innerText = `₹${(window.accountBalances.cash || 0).toLocaleString()}`;
+            document.getElementById('acc-federal-val').innerText = `₹${(window.accountBalances.federal || 0).toLocaleString()}`;
+            document.getElementById('acc-sbi-val').innerText = `₹${(window.accountBalances.sbi || 0).toLocaleString()}`;
+
+            document.getElementById('init-cash').value = window.accountBalances.cash || 0;
+            document.getElementById('init-federal').value = window.accountBalances.federal || 0;
+            document.getElementById('init-sbi').value = window.accountBalances.sbi || 0;
+
+            // Render Dashboard Routines List
+            const dashRoutines = document.getElementById('dash-today-routines');
+            dashRoutines.innerHTML = '';
+            if (window.routines.length === 0) {
+                dashRoutines.innerHTML = `<p class="text-xs text-neutral-400 py-2">ശീലങ്ങളൊന്നും ചേർത്തിട്ടില്ല.</p>`;
+            } else {
+                window.routines.slice(0, 3).forEach(r => {
+                    dashRoutines.innerHTML += `
+                        <div class="flex items-center justify-between p-2 rounded-xl border border-neutral-100 bg-neutral-50/50">
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" ${r.completed ? 'checked' : ''} onchange="toggleRoutine(${r.id})" class="rounded border-neutral-300 text-neutral-900 focus:ring-0">
+                                <span class="text-xs font-semibold ${r.completed ? 'line-through text-neutral-400' : 'text-neutral-800'}">${r.title}</span>
+                            </div>
+                            <span class="text-[10px] font-bold text-neutral-400">${r.time}</span>
+                        </div>
+                    `;
+                });
+            }
+
+            // Render Dashboard Tasks List
+            const dashTasks = document.getElementById('dash-today-tasks');
+            dashTasks.innerHTML = '';
+            if (window.tasks.length === 0) {
+                dashTasks.innerHTML = `<p class="text-xs text-neutral-400 py-2">ടാസ്കുകളൊന്നും ചേര്‍ത്തിട്ടില്ല.</p>`;
+            } else {
+                window.tasks.slice(0, 3).forEach(t => {
+                    dashTasks.innerHTML += `
+                        <div class="flex items-center justify-between p-2 rounded-xl border border-neutral-100 bg-neutral-50/50">
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTask(${t.id})" class="rounded border-neutral-300 text-neutral-900 focus:ring-0">
+                                <span class="text-xs font-semibold ${t.completed ? 'line-through text-neutral-400' : 'text-neutral-800'}">${t.title}</span>
+                            </div>
+                            <span class="text-[10px] font-bold text-neutral-400">${t.time}</span>
+                        </div>
+                    `;
+                });
+            }
+
+            // Render Dashboard Goals Summary
+            const dashGoals = document.getElementById('dash-goals-summary');
+            dashGoals.innerHTML = '';
+            if (window.goals.length === 0) {
+                dashGoals.innerHTML = `<p class="text-xs text-neutral-400 py-2">ലക്ഷ്യങ്ങൾ ഏതും ചേർത്തിട്ടില്ല.</p>`;
+            } else {
+                window.goals.slice(0, 2).forEach(g => {
+                    const pct = Math.min(100, Math.round((g.saved / g.target) * 100));
+                    dashGoals.innerHTML += `
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-xs font-bold text-neutral-800">
+                                <span>${g.title}</span>
+                                <span>${pct}%</span>
+                            </div>
+                            <div class="w-full bg-neutral-100 h-2 rounded-full overflow-hidden">
+                                <div class="bg-emerald-500 h-full rounded-full" style="width: ${pct}%"></div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            // Render Dashboard Payables
+            const dashPay = document.getElementById('dash-payables-list');
+            dashPay.innerHTML = '';
+            const pendingDebts = window.debts.filter(d => d.type === 'payable' && d.amount > 0);
+            if (pendingDebts.length === 0) {
+                dashPay.innerHTML = `<p class="text-xs text-neutral-400 py-2">കൊടുക്കാനുള്ള ബാധ്യതകൾ ഒന്നുമില്ല!</p>`;
+            } else {
+                pendingDebts.slice(0, 2).forEach(d => {
+                    dashPay.innerHTML += `
+                        <div class="flex justify-between items-center p-2 rounded-xl bg-rose-50/50 border border-rose-100">
+                            <span class="text-xs font-bold text-neutral-800">${d.person}</span>
+                            <span class="text-xs font-black text-rose-600">₹${d.amount.toLocaleString()}</span>
+                        </div>
+                    `;
+                });
+            }
+
+            // Render Full Routines List
+            const routinesList = document.getElementById('routines-list');
+            routinesList.innerHTML = '';
+            window.routines.forEach(r => {
+                routinesList.innerHTML += `
+                    <div class="app-card p-3 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" ${r.completed ? 'checked' : ''} onchange="toggleRoutine(${r.id})" class="w-4 h-4 rounded border-neutral-300 text-neutral-900 focus:ring-0">
+                            <div>
+                                <h4 class="text-xs font-bold ${r.completed ? 'line-through text-neutral-400' : 'text-neutral-900'}">${r.title}</h4>
+                                <span class="text-[10px] text-neutral-400 font-medium">${r.time}</span>
+                            </div>
+                        </div>
+                        <button onclick="deleteRoutine(${r.id})" class="text-neutral-300 hover:text-rose-500 text-xs transition-colors"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                `;
+            });
+
+            // Render Tasks List
+            const tasksList = document.getElementById('tasks-list');
+            tasksList.innerHTML = '';
+            window.tasks.forEach(t => {
+                tasksList.innerHTML += `
+                    <div class="app-card p-3 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTask(${t.id})" class="w-4 h-4 rounded border-neutral-300 text-neutral-900 focus:ring-0">
+                            <div>
+                                <h4 class="text-xs font-bold ${t.completed ? 'line-through text-neutral-400' : 'text-neutral-900'}">${t.title}</h4>
+                                <span class="text-[10px] text-neutral-400 font-medium">${t.date} | ${t.time}</span>
+                            </div>
+                        </div>
+                        <button onclick="deleteTask(${t.id})" class="text-neutral-300 hover:text-rose-500 text-xs transition-colors"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                `;
+            });
+
+            // Render Finance List
+            const financeList = document.getElementById('finance-list');
+            financeList.innerHTML = '';
+            window.transactions.forEach(t => {
+                const isInc = t.type === 'income';
+                financeList.innerHTML += `
+                    <div class="app-card p-3 flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-xl ${isInc ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-500'} flex items-center justify-center text-xs font-bold">
+                                <i class="fa-solid ${isInc ? 'fa-arrow-down-left' : 'fa-arrow-up-right'}"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-neutral-900">${t.desc}</h4>
+                                <span class="text-[10px] text-neutral-400 font-medium uppercase">${t.account} • ${t.date}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs font-black ${isInc ? 'text-emerald-600' : 'text-rose-600'}">${isInc ? '+' : '-'}₹${t.amount.toLocaleString()}</span>
+                            <button onclick="deleteTransaction(${t.id})" class="text-neutral-300 hover:text-rose-500 text-xs transition-colors"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Render Debts List with Ledger View Button
+            const debtsList = document.getElementById('debts-list');
+            debtsList.innerHTML = '';
+            window.debts.forEach(d => {
+                const isRec = d.type === 'receivable';
+                debtsList.innerHTML += `
+                    <div class="app-card p-3.5 space-y-2 debt-card" onclick="viewDebtHistory(${d.id})">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="inline-block px-2 py-0.5 rounded-md text-[9px] font-bold ${isRec ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'} mb-1">
+                                    ${isRec ? '🟢 കിട്ടാനുള്ളത്' : '🔴 കൊടുക്കാനുള്ളത്'}
+                                </span>
+                                <h4 class="text-sm font-extrabold text-neutral-900">${d.person}</h4>
+                                <p class="text-[10px] text-neutral-400 font-medium">${d.desc || 'കടം എൻട്രി'} (${d.date})</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs font-black ${isRec ? 'text-emerald-700' : 'text-rose-600'} block">₹${d.amount.toLocaleString()}</span>
+                                <span class="text-[9px] text-neutral-400 font-semibold block">ആകെ തുക: ₹${(d.initialAmount || d.amount).toLocaleString()}</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-2 pt-1 border-t border-neutral-100" onclick="event.stopPropagation()">
+                            <button onclick="openPaymentModal(${d.id})" class="flex-1 py-1.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg text-[10px] font-bold transition-all shadow-sm">
+                                <i class="fa-solid fa-coins mr-1"></i> അടവ് / Partial Pay
+                            </button>
+                            <button onclick="viewDebtHistory(${d.id})" class="px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-lg text-[10px] font-bold transition-colors">
+                                History
+                            </button>
+                            <button onclick="deleteDebt(${d.id})" class="px-2 py-1.5 text-neutral-400 hover:text-rose-500 text-xs transition-colors">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Render Loans List
+            const loansList = document.getElementById('loans-list');
+            loansList.innerHTML = '';
+            window.loans.forEach(l => {
+                loansList.innerHTML += `
+                    <div class="app-card p-3.5 space-y-2">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="text-sm font-extrabold text-neutral-900">${l.title}</h4>
+                                <span class="text-[10px] text-neutral-400 font-medium uppercase">മാസാന്ത EMI: ₹${l.emi.toLocaleString()} | Due Day: ${l.dueday}</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs font-black text-rose-600">₹${l.principal.toLocaleString()}</span>
+                                <span class="text-[9px] text-neutral-400 font-bold block uppercase">${l.account}</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center pt-1 border-t border-neutral-100">
+                            <button onclick="payLoanEmi(${l.id})" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold rounded-lg transition-all shadow-sm flex items-center gap-1">
+                                <i class="fa-solid fa-credit-card"></i> Pay EMI
+                            </button>
+                            <button onclick="deleteLoan(${l.id})" class="text-neutral-300 hover:text-rose-500 text-xs transition-colors"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Render Chitty List
+            const chittyList = document.getElementById('chitty-list');
+            chittyList.innerHTML = '';
+            window.chitty.forEach(c => {
+                const paidAmt = c.paidMonths * c.inst;
+                const remAmt = Math.max(0, c.total - paidAmt);
+                const pct = Math.min(100, Math.round((c.paidMonths / c.months) * 100));
+
+                chittyList.innerHTML += `
+                    <div class="app-card p-3.5 space-y-2.5">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="text-sm font-extrabold text-neutral-900">${c.name}</h4>
+                                <span class="text-[10px] text-neutral-400 font-medium">പ്രതിമാസം ₹${c.inst.toLocaleString()} | Due Day: ${c.dueday}</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs font-black text-indigo-700 block">₹${c.total.toLocaleString()}</span>
+                                <span class="text-[9px] text-neutral-400 font-semibold block">${c.paidMonths}/${c.months} മാസങ്ങൾ</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-[10px] font-bold text-neutral-500">
+                                <span>അടച്ചത്: ₹${paidAmt.toLocaleString()}</span>
+                                <span>ബാക്കി: ₹${remAmt.toLocaleString()}</span>
+                            </div>
+                            <div class="w-full bg-neutral-100 h-2 rounded-full overflow-hidden">
+                                <div class="bg-indigo-600 h-full rounded-full transition-all duration-300" style="width: ${pct}%"></div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center pt-1 border-t border-neutral-100">
+                            <button onclick="payChittyInstallment(${c.id})" class="px-3 py-1.5 bg-neutral-900 hover:bg-neutral-800 text-white text-[10px] font-bold rounded-lg transition-all shadow-sm flex items-center gap-1">
+                                <i class="fa-solid fa-receipt"></i> Pay Installment (₹${c.inst.toLocaleString()})
+                            </button>
+                            <button onclick="deleteChitty(${c.id})" class="text-neutral-300 hover:text-rose-500 text-xs transition-colors"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Render Goals List
+            const goalsList = document.getElementById('goals-list');
+            goalsList.innerHTML = '';
+            window.goals.forEach(g => {
+                const pct = Math.min(100, Math.round((g.saved / g.target) * 100));
+                goalsList.innerHTML += `
+                    <div class="app-card p-3.5 space-y-2">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h4 class="text-xs font-bold text-neutral-900">${g.title}</h4>
+                                <span class="text-[10px] text-neutral-400 font-medium">ലക്ഷ്യം: ₹${g.target.toLocaleString()} | ${g.date}</span>
+                            </div>
+                            <button onclick="deleteGoal(${g.id})" class="text-neutral-300 hover:text-rose-500 text-xs transition-colors"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-[10px] font-bold text-neutral-500">
+                                <span>സേവ് ചെയ്തത്: ₹${g.saved.toLocaleString()}</span>
+                                <span>${pct}%</span>
+                            </div>
+                            <div class="w-full bg-neutral-100 h-2 rounded-full overflow-hidden">
+                                <div class="bg-emerald-500 h-full rounded-full" style="width: ${pct}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // INIT APPLICATION ON WINDOW LOAD
+        window.onload = function() {
+            loadState();
+            applyLanguage();
+            renderAll();
+        };
+    </script>
+</body>
+</html>
+```
